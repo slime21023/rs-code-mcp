@@ -8,7 +8,8 @@
     "dev": "bun --watch index.ts",
     "typecheck": "bunx tsc -p tsconfig.json",
     "test": "bun test",
-    "test:coverage": "bun test --coverage"
+    "test:coverage": "bun test --coverage",
+    "build:bin": "bun build --compile index.ts --outfile dist/rs-code-mcp"
   },
   "devDependencies": {
     "@types/bun": "latest"
