@@ -2,7 +2,7 @@ import { McpServer } from "./src/mcp/server.ts";
 import { createToolRegistry } from "./src/tools/registry.ts";
 
 const APP_NAME = "rs-code-mcp";
-const APP_VERSION = "0.1.0";
+const APP_VERSION = "0.1.1";
 
 type CliOptions =
   | { kind: "run"; rootDir: string }
@@ -65,4 +65,4 @@ if (cli.kind === "error") {
 }
 
 const toolRegistry = createToolRegistry({ rootDir: cli.rootDir });
-new McpServer({ toolRegistry }).start();
+await new McpServer({ toolRegistry }).start();

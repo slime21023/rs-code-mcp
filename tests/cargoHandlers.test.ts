@@ -1,6 +1,14 @@
 import { describe, expect, test } from "bun:test";
 import { applyClippySuggestions, runCargoCheck, validateLifetimes } from "../src/tools/handlers/cargo.ts";
 
+function firstText(res: { content: Array<{ type: string; [k: string]: unknown }> }) {
+  const item = res.content[0];
+  if (!item || item.type !== "text") {
+    throw new Error("Expected first content item to be text");
+  }
+  return (item as any).text as string;
+}
+
 describe("cargo handlers (unit)", () => {
   test("runCargoCheck wraps runtime.runCargo", async () => {
     const res = await runCargoCheck(
@@ -13,7 +21,7 @@ describe("cargo handlers (unit)", () => {
       { extraArgs: ["-q"] },
     );
     expect(res.isError).not.toBeTrue();
-    expect(JSON.parse(res.content[0]!.text).stdout).toContain("check -q");
+    expect(JSON.parse(firstText(res)).stdout).toContain("check -q");
   });
 
   test("applyClippySuggestions wraps runtime.runCargo", async () => {
@@ -27,7 +35,7 @@ describe("cargo handlers (unit)", () => {
       {},
     );
     expect(res.isError).not.toBeTrue();
-    expect(JSON.parse(res.content[0]!.text).stdout).toBe("ok");
+    expect(JSON.parse(firstText(res)).stdout).toBe("ok");
   });
 
   test("validateLifetimes extracts lifetime lines", async () => {
@@ -44,9 +52,8 @@ describe("cargo handlers (unit)", () => {
       },
       {},
     );
-    const json = JSON.parse(res.content[0]!.text);
+    const json = JSON.parse(firstText(res));
     expect(Array.isArray(json.lifetimeRelated)).toBeTrue();
     expect(json.lifetimeRelated.join("\n")).toContain("does not live long enough");
   });
 });
-

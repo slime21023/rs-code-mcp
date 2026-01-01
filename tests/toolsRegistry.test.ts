@@ -3,6 +3,14 @@ import fs from "node:fs/promises";
 import path from "node:path";
 import { createToolRegistry } from "../src/tools/registry.ts";
 
+function firstText(res: { content: Array<{ type: string; [k: string]: unknown }> }) {
+  const item = res.content[0];
+  if (!item || item.type !== "text") {
+    throw new Error("Expected first content item to be text");
+  }
+  return (item as any).text as string;
+}
+
 async function mkWorkspaceTempDir() {
   const base = path.join(process.cwd(), ".tmp-tests");
   await fs.mkdir(base, { recursive: true });
@@ -21,7 +29,7 @@ describe("tools registry", () => {
     const reg = createToolRegistry({ rootDir: process.cwd() });
     const res = await reg.callTool({ name: "no_such_tool", arguments: {} });
     expect(res.isError).toBeTrue();
-    expect(res.content[0]?.text).toContain("Unknown tool");
+    expect(firstText(res)).toContain("Unknown tool");
   });
 
   test("routes to a local (non-LSP) tool handler", async () => {
@@ -31,7 +39,7 @@ describe("tools registry", () => {
       arguments: { name: "User", fields: [{ name: "name", type: "String" }] },
     });
     expect(res.isError).not.toBeTrue();
-    expect(res.content[0]?.text).toContain("struct User");
+    expect(firstText(res)).toContain("struct User");
   });
 
   test("handler exceptions are caught and returned as error", async () => {
@@ -51,7 +59,7 @@ describe("tools registry", () => {
       const reg = createToolRegistry({ rootDir: dir });
       const res = await reg.callTool({ name: "analyze_manifest", arguments: {} });
       expect(res.isError).not.toBeTrue();
-      const text = res.content[0]?.text ?? "";
+      const text = firstText(res);
       const json = JSON.parse(text);
       expect(json.package.name).toBe("demo");
     } finally {
@@ -63,4 +71,3 @@ describe("tools registry", () => {
     }
   });
 });
-

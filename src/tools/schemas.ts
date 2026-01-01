@@ -1,4 +1,11 @@
-export const schemas = {
+type JsonObjectSchema = {
+  type: "object";
+  properties: Record<string, object>;
+  required?: string[];
+  [k: string]: unknown;
+};
+
+export const schemas: { pos: JsonObjectSchema; range: JsonObjectSchema } = {
   pos: {
     type: "object",
     properties: {
@@ -19,5 +26,4 @@ export const schemas = {
     },
     required: ["filePath", "startLine", "startCharacter", "endLine", "endCharacter"],
   },
-} as const;
-
+};
